@@ -2055,9 +2055,13 @@ function loadStoreSettings(){
   if(document.getElementById('settingWhatsappEG')) document.getElementById('settingWhatsappEG').value = waEG;
   if(document.getElementById('settingWhatsappUAE')) document.getElementById('settingWhatsappUAE').value = waUAE;
   if(document.getElementById('settingEyebrow')) document.getElementById('settingEyebrow').value = eyebrow;
-  if(document.getElementById('ghUsername')) document.getElementById('ghUsername').value = localStorage.getItem('mstore_setting_gh_user') || '';
-  if(document.getElementById('ghRepo')) document.getElementById('ghRepo').value = localStorage.getItem('mstore_setting_gh_repo') || '';
-  if(document.getElementById('ghFolder')) document.getElementById('ghFolder').value = localStorage.getItem('mstore_setting_gh_folder') || '';
+  var defaultGhUser = 'amiralafify11-blip';
+  var defaultGhRepo = 'MStore';
+  var defaultGhFolder = 'New folder';
+
+  if(document.getElementById('ghUsername')) document.getElementById('ghUsername').value = localStorage.getItem('mstore_setting_gh_user') || defaultGhUser;
+  if(document.getElementById('ghRepo')) document.getElementById('ghRepo').value = localStorage.getItem('mstore_setting_gh_repo') || defaultGhRepo;
+  if(document.getElementById('ghFolder')) document.getElementById('ghFolder').value = localStorage.getItem('mstore_setting_gh_folder') || defaultGhFolder;
   if(document.getElementById('ghToken')) document.getElementById('ghToken').value = localStorage.getItem('mstore_setting_gh_token') || '';
 }
 
@@ -2233,8 +2237,13 @@ function forceReloadFromDataJson(){
    تلقائياً عبر GitHub REST API دون الحاجة لأي تعديل يدوي!
    ========================================== */
 function publishDirectToGitHub(){
-  var user = (document.getElementById('ghUsername') ? document.getElementById('ghUsername').value.trim() : '') || localStorage.getItem('mstore_setting_gh_user') || '';
-  var repo = (document.getElementById('ghRepo') ? document.getElementById('ghRepo').value.trim() : '') || localStorage.getItem('mstore_setting_gh_repo') || '';
+  var defaultGhUser = 'amiralafify11-blip';
+  var defaultGhRepo = 'MStore';
+  var defaultGhFolder = 'New folder';
+
+  var user = (document.getElementById('ghUsername') ? document.getElementById('ghUsername').value.trim() : '') || localStorage.getItem('mstore_setting_gh_user') || defaultGhUser;
+  var repo = (document.getElementById('ghRepo') ? document.getElementById('ghRepo').value.trim() : '') || localStorage.getItem('mstore_setting_gh_repo') || defaultGhRepo;
+  var folder = (document.getElementById('ghFolder') ? document.getElementById('ghFolder').value.trim() : '') || localStorage.getItem('mstore_setting_gh_folder') || defaultGhFolder;
   var token = (document.getElementById('ghToken') ? document.getElementById('ghToken').value.trim() : '') || localStorage.getItem('mstore_setting_gh_token') || '';
 
   var statusEl = document.getElementById('ghPublishStatus');
@@ -2305,7 +2314,6 @@ function publishDirectToGitHub(){
   // تشفير المحتوى إلى Base64 مع دعم كامل للنصوص العربية (UTF-8)
   var encodedContent = btoa(unescape(encodeURIComponent(jsonContent)));
 
-  var folder = (document.getElementById('ghFolder') ? document.getElementById('ghFolder').value.trim() : '') || localStorage.getItem('mstore_setting_gh_folder') || '';
   if(folder) localStorage.setItem('mstore_setting_gh_folder', folder);
 
   // تنظيف مسار المجلد إن وجد
