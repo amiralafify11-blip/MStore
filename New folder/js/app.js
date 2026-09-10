@@ -24,8 +24,8 @@
     'mstore_setting_hero_title',
     'mstore_setting_gh_user',
     'mstore_setting_gh_repo',
-    'mstore_setting_gh_folder',
-    'mstore_setting_gh_token'
+    'mstore_setting_gh_folder'
+    // mstore_setting_gh_token مُستثنى عمداً — لا يُخزَّن في data.json لتجنب اكتشافه بواسطة GitHub Secret Scanning
   ];
   var LOADED_FLAG = 'mstore_data_json_loaded_v1';
 
@@ -2327,8 +2327,8 @@ function publishDirectToGitHub(isSilent){
     'mstore_setting_hero_title',
     'mstore_setting_gh_user',
     'mstore_setting_gh_repo',
-    'mstore_setting_gh_folder',
-    'mstore_setting_gh_token'
+    'mstore_setting_gh_folder'
+    // mstore_setting_gh_token مُستثنى عمداً — لا يُرفع في data.json لتجنب GitHub Secret Scanning
   ];
 
   var snapshot = {
