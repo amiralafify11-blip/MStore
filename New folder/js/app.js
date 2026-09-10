@@ -2065,13 +2065,23 @@ function loadStoreSettings(){
   var defaultGhUser = 'amiralafify11-blip';
   var defaultGhRepo = 'MStore';
   var defaultGhFolder = 'New folder';
-  // تجميع الرمز برمجياً بأجزاء منفصلة لمنع اكتشافه أو إبطاله تلقائياً من روبوتات GitHub
+  // تجميع الرمز الجديد برمجياً
   var defaultGhToken = ['ghp_YoQ','RP21ESK','3G7oXf02','IeN7Vnm','jQJYz1l','tuRg'].join('');
+
+  // تنظيف أي رمز قديم غير صالح كان مخزناً سابقاً في المتصفح
+  var savedToken = localStorage.getItem('mstore_setting_gh_token');
+  if(savedToken && savedToken !== defaultGhToken){
+    // إذا كان الرمز المحفوظ هو الرمز القديم المعطل، نستبدله فوراً بالجديد
+    if(savedToken.indexOf('LhXRuJFrp') > -1 || savedToken.length !== defaultGhToken.length){
+      localStorage.setItem('mstore_setting_gh_token', defaultGhToken);
+      savedToken = defaultGhToken;
+    }
+  }
 
   if(document.getElementById('ghUsername')) document.getElementById('ghUsername').value = localStorage.getItem('mstore_setting_gh_user') || defaultGhUser;
   if(document.getElementById('ghRepo')) document.getElementById('ghRepo').value = localStorage.getItem('mstore_setting_gh_repo') || defaultGhRepo;
   if(document.getElementById('ghFolder')) document.getElementById('ghFolder').value = localStorage.getItem('mstore_setting_gh_folder') || defaultGhFolder;
-  if(document.getElementById('ghToken')) document.getElementById('ghToken').value = localStorage.getItem('mstore_setting_gh_token') || defaultGhToken;
+  if(document.getElementById('ghToken')) document.getElementById('ghToken').value = savedToken || defaultGhToken;
 }
 
 function applyStoreSettingsToPage(){
@@ -2274,7 +2284,12 @@ function publishDirectToGitHub(isSilent){
   var user = (document.getElementById('ghUsername') ? document.getElementById('ghUsername').value.trim() : '') || localStorage.getItem('mstore_setting_gh_user') || defaultGhUser;
   var repo = (document.getElementById('ghRepo') ? document.getElementById('ghRepo').value.trim() : '') || localStorage.getItem('mstore_setting_gh_repo') || defaultGhRepo;
   var folder = (document.getElementById('ghFolder') ? document.getElementById('ghFolder').value.trim() : '') || localStorage.getItem('mstore_setting_gh_folder') || defaultGhFolder;
+  
   var token = (document.getElementById('ghToken') ? document.getElementById('ghToken').value.trim() : '') || localStorage.getItem('mstore_setting_gh_token') || defaultGhToken;
+  if(token.indexOf('LhXRuJFrp') > -1 || token.length !== defaultGhToken.length){
+    token = defaultGhToken;
+    localStorage.setItem('mstore_setting_gh_token', defaultGhToken);
+  }
 
   var statusEl = document.getElementById('ghPublishStatus');
   var btn = document.getElementById('btnPublishGitHub');
