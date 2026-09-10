@@ -1,10 +1,64 @@
 {
-  "_version": 1789075274143,
-  "_updated_at": "2026-09-10T21:21:14.143Z",
+  "_version": 1789075750372,
+  "_updated_at": "2026-09-10T21:29:10.372Z",
   "_note": "تم التحديث تلقائياً من لوحة تحكم MSTORE عبر GitHub API",
   "mstore_custom_series": [],
   "mstore_custom_products": [],
-  "mstore_product_details": {},
+  "mstore_product_details": {
+    "iPhone 13": {
+      "name": "iPhone 13",
+      "price": 999,
+      "badge": "حصري",
+      "os": "iOS 18",
+      "conditions": [
+        {
+          "label": "مستعمل A+",
+          "price": 999
+        },
+        {
+          "label": "AG",
+          "price": 950
+        },
+        {
+          "label": "مبدل قطعة غير أصلية",
+          "price": 800
+        }
+      ],
+      "img": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Apple_iPhone_13_Pro.jpg",
+      "images": [
+        "https://commons.wikimedia.org/wiki/Special:Redirect/file/Apple_iPhone_13_Pro.jpg"
+      ],
+      "screen": "6.9 بوصة Super Retina XDR",
+      "chip": "A19 Pro / Bionic",
+      "camera": "48MP + 48MP + 12MP",
+      "battery": "حتى 33 ساعة تشغيل فيديو",
+      "colors": [
+        {
+          "label": "أبيض تيتانيوم",
+          "code": "#e9e6de"
+        },
+        {
+          "label": "أزرق داكن",
+          "code": "#2e3a52"
+        },
+        {
+          "label": "بينك",
+          "code": "#ffbdbd"
+        }
+      ],
+      "storages": [
+        {
+          "size": "128GB",
+          "add": 0
+        },
+        {
+          "size": "256GB",
+          "add": 150
+        }
+      ],
+      "about": "يأتي iPhone 13 بتصميم أنيق وأداء فائق مع أفضل المواصفات لتجربة استخدام استثنائية."
+    }
+  },
   "mstore_product_overrides": {
     "iPhone 17 Pro Max": {
       "available": false
@@ -50,6 +104,9 @@
     },
     "iPhone 14 Plus": {
       "available": false
+    },
+    "iPhone 13": {
+      "price": 999
     }
   },
   "mstore_setting_facebook": "https://facebook.com",
