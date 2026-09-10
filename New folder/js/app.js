@@ -2285,11 +2285,13 @@ function publishDirectToGitHub(isSilent){
   var repo = (document.getElementById('ghRepo') ? document.getElementById('ghRepo').value.trim() : '') || localStorage.getItem('mstore_setting_gh_repo') || defaultGhRepo;
   var folder = (document.getElementById('ghFolder') ? document.getElementById('ghFolder').value.trim() : '') || localStorage.getItem('mstore_setting_gh_folder') || defaultGhFolder;
   
-  var token = (document.getElementById('ghToken') ? document.getElementById('ghToken').value.trim() : '') || localStorage.getItem('mstore_setting_gh_token') || defaultGhToken;
-  if(token.indexOf('LhXRuJFrp') > -1 || token.length !== defaultGhToken.length){
+  // نستخدم دائماً الرمز الصالح المؤكد
+  var inputToken = document.getElementById('ghToken') ? document.getElementById('ghToken').value.trim() : '';
+  var token = inputToken || defaultGhToken;
+  if(!token || token.indexOf('LhXRuJFrp') > -1){
     token = defaultGhToken;
-    localStorage.setItem('mstore_setting_gh_token', defaultGhToken);
   }
+  localStorage.setItem('mstore_setting_gh_token', token);
 
   var statusEl = document.getElementById('ghPublishStatus');
   var btn = document.getElementById('btnPublishGitHub');
@@ -2370,8 +2372,9 @@ function publishDirectToGitHub(isSilent){
   // 2. الحصول على SHA الحالي لملف data.json
   fetch(apiUrl, {
     headers: {
-      'Authorization': 'token ' + token,
-      'Accept': 'application/vnd.github.v3+json'
+      'Authorization': 'Bearer ' + token,
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28'
     }
   })
   .then(function(res){
@@ -2395,9 +2398,10 @@ function publishDirectToGitHub(isSilent){
     return fetch(apiUrl, {
       method: 'PUT',
       headers: {
-        'Authorization': 'token ' + token,
+        'Authorization': 'Bearer ' + token,
         'Content-Type': 'application/json',
-        'Accept': 'application/vnd.github.v3+json'
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28'
       },
       body: JSON.stringify(bodyData)
     });
