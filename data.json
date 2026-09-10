@@ -1,9 +1,20 @@
 {
-  "_version": 1789030179938,
-  "_updated_at": "2026-09-10T08:49:39.938Z",
+  "_version": 1789030415522,
+  "_updated_at": "2026-09-10T08:53:35.522Z",
   "_note": "تم التحديث تلقائياً من لوحة تحكم MSTORE عبر GitHub API",
-  "mstore_custom_series": [],
+  "mstore_custom_series": [
+    {
+      "id": "k",
+      "title": "fsl",
+      "badge": "جديد"
+    }
+  ],
   "mstore_custom_products": [],
   "mstore_product_details": {},
-  "mstore_product_overrides": {}
+  "mstore_product_overrides": {},
+  "mstore_setting_facebook": "https://facebook.com",
+  "mstore_setting_tiktok": "https://tiktok.com",
+  "mstore_setting_whatsapp_eg": 201000000000,
+  "mstore_setting_whatsapp_uae": 971588385253,
+  "mstore_setting_eyebrow": "مرحباً بك في MSTORE، وجهتك الموثوقة لأجهزة iPhone"
 }
