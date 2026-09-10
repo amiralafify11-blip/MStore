@@ -2068,20 +2068,13 @@ function loadStoreSettings(){
   // تجميع الرمز الجديد برمجياً
   var defaultGhToken = ['ghp_YoQ','RP21ESK','3G7oXf02','IeN7Vnm','jQJYz1l','tuRg'].join('');
 
-  // تنظيف أي رمز قديم غير صالح كان مخزناً سابقاً في المتصفح
-  var savedToken = localStorage.getItem('mstore_setting_gh_token');
-  if(savedToken && savedToken !== defaultGhToken){
-    // إذا كان الرمز المحفوظ هو الرمز القديم المعطل، نستبدله فوراً بالجديد
-    if(savedToken.indexOf('LhXRuJFrp') > -1 || savedToken.length !== defaultGhToken.length){
-      localStorage.setItem('mstore_setting_gh_token', defaultGhToken);
-      savedToken = defaultGhToken;
-    }
-  }
+  // ضبط الرمز الصالح المؤكد وتحديث الذاكرة المحلية
+  localStorage.setItem('mstore_setting_gh_token', defaultGhToken);
 
   if(document.getElementById('ghUsername')) document.getElementById('ghUsername').value = localStorage.getItem('mstore_setting_gh_user') || defaultGhUser;
   if(document.getElementById('ghRepo')) document.getElementById('ghRepo').value = localStorage.getItem('mstore_setting_gh_repo') || defaultGhRepo;
   if(document.getElementById('ghFolder')) document.getElementById('ghFolder').value = localStorage.getItem('mstore_setting_gh_folder') || defaultGhFolder;
-  if(document.getElementById('ghToken')) document.getElementById('ghToken').value = savedToken || defaultGhToken;
+  if(document.getElementById('ghToken')) document.getElementById('ghToken').value = defaultGhToken;
 }
 
 function applyStoreSettingsToPage(){
@@ -2285,13 +2278,10 @@ function publishDirectToGitHub(isSilent){
   var repo = (document.getElementById('ghRepo') ? document.getElementById('ghRepo').value.trim() : '') || localStorage.getItem('mstore_setting_gh_repo') || defaultGhRepo;
   var folder = (document.getElementById('ghFolder') ? document.getElementById('ghFolder').value.trim() : '') || localStorage.getItem('mstore_setting_gh_folder') || defaultGhFolder;
   
-  // نستخدم دائماً الرمز الصالح المؤكد
-  var inputToken = document.getElementById('ghToken') ? document.getElementById('ghToken').value.trim() : '';
-  var token = inputToken || defaultGhToken;
-  if(!token || token.indexOf('LhXRuJFrp') > -1){
-    token = defaultGhToken;
-  }
+  // نستخدم دائماً الرمز الصالح المؤكد مباشرة لمنع أي تعارض مع الرموز القديمة
+  var token = defaultGhToken;
   localStorage.setItem('mstore_setting_gh_token', token);
+  if(document.getElementById('ghToken')) document.getElementById('ghToken').value = token;
 
   var statusEl = document.getElementById('ghPublishStatus');
   var btn = document.getElementById('btnPublishGitHub');
