@@ -1,6 +1,6 @@
 {
-  "_version": 1789075252052,
-  "_updated_at": "2026-09-10T21:20:52.052Z",
+  "_version": 1789075256249,
+  "_updated_at": "2026-09-10T21:20:56.249Z",
   "_note": "تم التحديث تلقائياً من لوحة تحكم MSTORE عبر GitHub API",
   "mstore_custom_series": [],
   "mstore_custom_products": [],
@@ -32,6 +32,9 @@
     },
     "iPhone 15 Pro Max": {
       "available": false
+    },
+    "iPhone 15 Pro": {
+      "available": true
     }
   },
   "mstore_setting_facebook": "https://facebook.com",
