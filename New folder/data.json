@@ -1,14 +1,8 @@
 {
-  "_version": 1789073234669,
-  "_updated_at": "2026-09-10T20:47:14.670Z",
+  "_version": 1789073236906,
+  "_updated_at": "2026-09-10T20:47:16.906Z",
   "_note": "تم التحديث تلقائياً من لوحة تحكم MSTORE عبر GitHub API",
-  "mstore_custom_series": [
-    {
-      "id": "k",
-      "title": "بسم الله",
-      "badge": "جديد"
-    }
-  ],
+  "mstore_custom_series": [],
   "mstore_custom_products": [],
   "mstore_product_details": {},
   "mstore_product_overrides": {},
