@@ -2052,6 +2052,7 @@ function loadStoreSettings(){
   if(document.getElementById('settingEyebrow')) document.getElementById('settingEyebrow').value = eyebrow;
   if(document.getElementById('ghUsername')) document.getElementById('ghUsername').value = localStorage.getItem('mstore_setting_gh_user') || '';
   if(document.getElementById('ghRepo')) document.getElementById('ghRepo').value = localStorage.getItem('mstore_setting_gh_repo') || '';
+  if(document.getElementById('ghFolder')) document.getElementById('ghFolder').value = localStorage.getItem('mstore_setting_gh_folder') || '';
   if(document.getElementById('ghToken')) document.getElementById('ghToken').value = localStorage.getItem('mstore_setting_gh_token') || '';
 }
 
@@ -2101,9 +2102,11 @@ function saveStoreSettings(){
 
   var ghU = document.getElementById('ghUsername') ? document.getElementById('ghUsername').value.trim() : '';
   var ghR = document.getElementById('ghRepo') ? document.getElementById('ghRepo').value.trim() : '';
+  var ghF = document.getElementById('ghFolder') ? document.getElementById('ghFolder').value.trim() : '';
   var ghT = document.getElementById('ghToken') ? document.getElementById('ghToken').value.trim() : '';
   if(ghU) localStorage.setItem('mstore_setting_gh_user', ghU);
   if(ghR) localStorage.setItem('mstore_setting_gh_repo', ghR);
+  if(ghF !== undefined) localStorage.setItem('mstore_setting_gh_folder', ghF);
   if(ghT) localStorage.setItem('mstore_setting_gh_token', ghT);
   
   if(newPass){
@@ -2289,7 +2292,16 @@ function publishDirectToGitHub(){
   // تشفير المحتوى إلى Base64 مع دعم كامل للنصوص العربية (UTF-8)
   var encodedContent = btoa(unescape(encodeURIComponent(jsonContent)));
 
-  var apiUrl = 'https://api.github.com/repos/' + encodeURIComponent(user) + '/' + encodeURIComponent(repo) + '/contents/data.json';
+  var folder = (document.getElementById('ghFolder') ? document.getElementById('ghFolder').value.trim() : '') || localStorage.getItem('mstore_setting_gh_folder') || '';
+  if(folder) localStorage.setItem('mstore_setting_gh_folder', folder);
+
+  // تنظيف مسار المجلد إن وجد
+  var pathPrefix = '';
+  if(folder){
+    pathPrefix = folder.replace(/^\/+|\/+$/g, '') + '/';
+  }
+
+  var apiUrl = 'https://api.github.com/repos/' + encodeURIComponent(user) + '/' + encodeURIComponent(repo) + '/contents/' + encodeURI(pathPrefix + 'data.json');
 
   // 2. الحصول على SHA الحالي لملف data.json (إن وجد)
   fetch(apiUrl, {
