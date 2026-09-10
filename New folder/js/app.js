@@ -21,7 +21,11 @@
     'mstore_setting_whatsapp_eg',
     'mstore_setting_whatsapp_uae',
     'mstore_setting_eyebrow',
-    'mstore_setting_hero_title'
+    'mstore_setting_hero_title',
+    'mstore_setting_gh_user',
+    'mstore_setting_gh_repo',
+    'mstore_setting_gh_folder',
+    'mstore_setting_gh_token'
   ];
   var LOADED_FLAG = 'mstore_data_json_loaded_v1';
 
@@ -45,6 +49,7 @@
       if(typeof applyStoreSettingsToPage === 'function') applyStoreSettingsToPage();
       if(typeof renderCustomSeriesToCatalog === 'function') renderCustomSeriesToCatalog();
       if(typeof applyProductOverridesToStore === 'function') applyProductOverridesToStore();
+      if(typeof loadStoreSettings === 'function') loadStoreSettings();
     })
     .catch(function(){ /* data.json not found or error – use localStorage as-is */ });
 })();
@@ -2169,7 +2174,11 @@ function publishToSite(){
     'mstore_setting_whatsapp_eg',
     'mstore_setting_whatsapp_uae',
     'mstore_setting_eyebrow',
-    'mstore_setting_hero_title'
+    'mstore_setting_hero_title',
+    'mstore_setting_gh_user',
+    'mstore_setting_gh_repo',
+    'mstore_setting_gh_folder',
+    'mstore_setting_gh_token'
   ];
 
   var snapshot = {
@@ -2268,7 +2277,11 @@ function publishDirectToGitHub(){
     'mstore_setting_whatsapp_eg',
     'mstore_setting_whatsapp_uae',
     'mstore_setting_eyebrow',
-    'mstore_setting_hero_title'
+    'mstore_setting_hero_title',
+    'mstore_setting_gh_user',
+    'mstore_setting_gh_repo',
+    'mstore_setting_gh_folder',
+    'mstore_setting_gh_token'
   ];
 
   var snapshot = {
