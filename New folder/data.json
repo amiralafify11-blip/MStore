@@ -1,11 +1,11 @@
 {
-  "_version": 1789032102436,
-  "_updated_at": "2026-09-10T09:21:42.436Z",
+  "_version": 1789067195204,
+  "_updated_at": "2026-09-10T19:06:35.204Z",
   "_note": "تم التحديث تلقائياً من لوحة تحكم MSTORE عبر GitHub API",
   "mstore_custom_series": [
     {
-      "id": "k",
-      "title": "بسم الله",
+      "id": "kk",
+      "title": "بسم الله الرحمن الرحيم",
       "badge": "جديد"
     }
   ],
@@ -16,5 +16,8 @@
   "mstore_setting_tiktok": "https://tiktok.com",
   "mstore_setting_whatsapp_eg": 201000000000,
   "mstore_setting_whatsapp_uae": 971588385253,
-  "mstore_setting_eyebrow": "مرحباً بك في MSTORE، وجهتك الموثوقة لأجهزة iPhone"
+  "mstore_setting_eyebrow": "مرحباً بك في MSTORE، وجهتك الموثوقة لأجهزة iPhone",
+  "mstore_setting_gh_user": "amiralafify11-blip",
+  "mstore_setting_gh_repo": "MStore",
+  "mstore_setting_gh_folder": "New folder"
 }
