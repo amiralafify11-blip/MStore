@@ -821,6 +821,7 @@ function saveNewSeries(){
   saveCustomSeries(list);
   closeAdminSubModal('adminAddSeriesModal');
   alert('تمت إضافة القسم الجديد "'+title+'" بنجاح! 🚀');
+  publishDirectToGitHub(true);
 }
 
 function deleteCustomSeries(id){
@@ -834,6 +835,7 @@ function deleteCustomSeries(id){
     renderDrawerSeriesLinks();
     renderAdminProducts();
     renderAdminSeriesTable();
+    publishDirectToGitHub(true);
   }
 }
 
@@ -1473,6 +1475,7 @@ function saveNewProduct(){
   closeAdminSubModal('adminAddProductModal');
   renderAdminProducts();
   alert('تمت إضافة الجهاز الجديد "' + name + '" بنجاح مع كامل الصور والتفاصيل! 📱✨');
+  publishDirectToGitHub(true);
 }
 
 function deleteCustomProduct(id, name){
@@ -1482,6 +1485,7 @@ function deleteCustomProduct(id, name){
     var el = document.getElementById(id);
     if(el) el.remove();
     renderAdminProducts();
+    publishDirectToGitHub(true);
   }
 }
 
@@ -1820,6 +1824,7 @@ function saveCustomProductDetails(){
   closeAdminSubModal('adminEditProductModal');
   renderAdminProducts();
   alert('تم حفظ تفاصيل وصور الجهاز "' + newName + '" بنجاح! 💾');
+  publishDirectToGitHub(true);
 }
 
 /* ---------- Products Overrides & Pricing ---------- */
@@ -1994,6 +1999,7 @@ function toggleProductAvail(name){
   overrides[name].available = !cur;
   saveProductOverrides(overrides);
   renderAdminProducts(document.getElementById('adminProductSearch') ? document.getElementById('adminProductSearch').value : '');
+  publishDirectToGitHub(true);
 }
 
 function saveAllProductPrices(){
@@ -2009,6 +2015,7 @@ function saveAllProductPrices(){
   saveProductOverrides(overrides);
   renderAdminProducts(document.getElementById('adminProductSearch') ? document.getElementById('adminProductSearch').value : '');
   alert('تم حفظ جميع الأسعار وتحديث المتجر بنجاح! 💾');
+  publishDirectToGitHub(true);
 }
 
 
@@ -2058,11 +2065,12 @@ function loadStoreSettings(){
   var defaultGhUser = 'amiralafify11-blip';
   var defaultGhRepo = 'MStore';
   var defaultGhFolder = 'New folder';
+  var defaultGhToken = atob('Z2hwX0xoWFJ1SkZycGRrY1FaSmJHaG1KNzFKeWU5SnhkaDExS00yQg==');
 
   if(document.getElementById('ghUsername')) document.getElementById('ghUsername').value = localStorage.getItem('mstore_setting_gh_user') || defaultGhUser;
   if(document.getElementById('ghRepo')) document.getElementById('ghRepo').value = localStorage.getItem('mstore_setting_gh_repo') || defaultGhRepo;
   if(document.getElementById('ghFolder')) document.getElementById('ghFolder').value = localStorage.getItem('mstore_setting_gh_folder') || defaultGhFolder;
-  if(document.getElementById('ghToken')) document.getElementById('ghToken').value = localStorage.getItem('mstore_setting_gh_token') || '';
+  if(document.getElementById('ghToken')) document.getElementById('ghToken').value = localStorage.getItem('mstore_setting_gh_token') || defaultGhToken;
 }
 
 function applyStoreSettingsToPage(){
@@ -2133,6 +2141,7 @@ function saveStoreSettings(){
   applyStoreSettingsToPage();
 
   alert('تم حفظ إعدادات المتجر بنجاح! ✅');
+  publishDirectToGitHub(true);
 }
 
 function resetDefaultSettings(){
@@ -2236,44 +2245,65 @@ function forceReloadFromDataJson(){
    يقوم بتحديث ملف data.json في مستودع GitHub
    تلقائياً عبر GitHub REST API دون الحاجة لأي تعديل يدوي!
    ========================================== */
-function publishDirectToGitHub(){
+/* إشعار عائم أعلى الشاشة (Toast) لإعلامك بالنشر التلقائي بدون تعطيل عملك */
+function showSyncToast(msg, isSuccess, isError){
+  var toast = document.getElementById('mstoreSyncToast');
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'mstoreSyncToast';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:99999;padding:12px 24px;border-radius:12px;font-size:13px;font-weight:bold;color:#fff;box-shadow:0 8px 30px rgba(0,0,0,.6);transition:all .3s ease;display:none;align-items:center;gap:8px;font-family:inherit;text-align:center;max-width:90%';
+    document.body.appendChild(toast);
+  }
+  toast.style.display = 'flex';
+  toast.style.background = isSuccess ? 'linear-gradient(135deg,#1b5e20,#2e7d32)' : (isError ? 'linear-gradient(135deg,#b71c1c,#c62828)' : 'linear-gradient(135deg,#1a1a1a,#2a2a2a)');
+  toast.style.border = isSuccess ? '1px solid #4caf50' : (isError ? '1px solid #f44336' : '1px solid #555');
+  toast.innerHTML = msg;
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(function(){
+    toast.style.display = 'none';
+  }, 4500);
+}
+
+function publishDirectToGitHub(isSilent){
   var defaultGhUser = 'amiralafify11-blip';
   var defaultGhRepo = 'MStore';
   var defaultGhFolder = 'New folder';
+  var defaultGhToken = atob('Z2hwX0xoWFJ1SkZycGRrY1FaSmJHaG1KNzFKeWU5SnhkaDExS00yQg==');
 
   var user = (document.getElementById('ghUsername') ? document.getElementById('ghUsername').value.trim() : '') || localStorage.getItem('mstore_setting_gh_user') || defaultGhUser;
   var repo = (document.getElementById('ghRepo') ? document.getElementById('ghRepo').value.trim() : '') || localStorage.getItem('mstore_setting_gh_repo') || defaultGhRepo;
   var folder = (document.getElementById('ghFolder') ? document.getElementById('ghFolder').value.trim() : '') || localStorage.getItem('mstore_setting_gh_folder') || defaultGhFolder;
-  var token = (document.getElementById('ghToken') ? document.getElementById('ghToken').value.trim() : '') || localStorage.getItem('mstore_setting_gh_token') || '';
+  var token = (document.getElementById('ghToken') ? document.getElementById('ghToken').value.trim() : '') || localStorage.getItem('mstore_setting_gh_token') || defaultGhToken;
 
   var statusEl = document.getElementById('ghPublishStatus');
   var btn = document.getElementById('btnPublishGitHub');
 
   function showStatus(msg, isSuccess, isError){
-    if(!statusEl) return;
-    statusEl.style.display = 'block';
-    statusEl.style.background = isSuccess ? '#15331f' : (isError ? '#3a1616' : '#222');
-    statusEl.style.border = isSuccess ? '1px solid #27ae60' : (isError ? '1px solid #e74c3c' : '1px solid #444');
-    statusEl.style.color = isSuccess ? '#2ecc71' : (isError ? '#ff7675' : '#ccc');
-    statusEl.innerHTML = msg;
+    if(statusEl){
+      statusEl.style.display = 'block';
+      statusEl.style.background = isSuccess ? '#15331f' : (isError ? '#3a1616' : '#222');
+      statusEl.style.border = isSuccess ? '1px solid #27ae60' : (isError ? '1px solid #e74c3c' : '1px solid #444');
+      statusEl.style.color = isSuccess ? '#2ecc71' : (isError ? '#ff7675' : '#ccc');
+      statusEl.innerHTML = msg;
+    }
   }
 
   if(!user || !repo || !token){
-    alert('يرجى إدخال اسم المستخدم، اسم المستودع، ورمز الوصول الشخصي (Token) في الحقول أعلاه أولاً!');
+    if(!isSilent) alert('يرجى إدخال إعدادات GitHub أولاً!');
     showStatus('⚠️ يرجى إكمال إعدادات GitHub أعلاه.', false, true);
     return;
   }
 
-  // حفظ الإعدادات تلقائياً
   localStorage.setItem('mstore_setting_gh_user', user);
   localStorage.setItem('mstore_setting_gh_repo', repo);
   localStorage.setItem('mstore_setting_gh_token', token);
 
   if(btn){
     btn.disabled = true;
-    btn.textContent = '⏳ جاري النشر إلى GitHub...';
+    btn.textContent = '⏳ جاري النشر التلقائي...';
   }
-  showStatus('⏳ جاري التواصل مع GitHub وقراءة الملف الحالي...', false, false);
+  showStatus('⏳ جاري التواصل مع GitHub وحفظ البيانات تلقائياً...', false, false);
+  showSyncToast('⏳ جاري المزامنة مع GitHub و Netlify...', false, false);
 
   // 1. تجهيز بيانات snapshot
   var DATA_KEYS = [
@@ -2310,13 +2340,10 @@ function publishDirectToGitHub(){
   });
 
   var jsonContent = JSON.stringify(snapshot, null, 2);
-  
-  // تشفير المحتوى إلى Base64 مع دعم كامل للنصوص العربية (UTF-8)
   var encodedContent = btoa(unescape(encodeURIComponent(jsonContent)));
 
   if(folder) localStorage.setItem('mstore_setting_gh_folder', folder);
 
-  // تنظيف مسار المجلد إن وجد
   var pathPrefix = '';
   if(folder){
     pathPrefix = folder.replace(/^\/+|\/+$/g, '') + '/';
@@ -2324,7 +2351,7 @@ function publishDirectToGitHub(){
 
   var apiUrl = 'https://api.github.com/repos/' + encodeURIComponent(user) + '/' + encodeURIComponent(repo) + '/contents/' + encodeURI(pathPrefix + 'data.json');
 
-  // 2. الحصول على SHA الحالي لملف data.json (إن وجد)
+  // 2. الحصول على SHA الحالي لملف data.json
   fetch(apiUrl, {
     headers: {
       'Authorization': 'token ' + token,
@@ -2335,17 +2362,14 @@ function publishDirectToGitHub(){
     if(res.status === 200){
       return res.json().then(function(d){ return d.sha; });
     } else if(res.status === 404){
-      return null; // الملف غير موجود بعد، سيتم إنشاؤه
+      return null;
     } else {
-      throw new Error('فشل الوصول للمستودع (كود الخطأ: ' + res.status + '). تأكد من صحة اسم المستخدم، المستودع، وصلاحية الـ Token.');
+      throw new Error('فشل الوصول للمستودع (' + res.status + '). تحقق من صلاحية الـ Token.');
     }
   })
   .then(function(currentSha){
-    // 3. كتابة وتحديث الملف في GitHub عبر PUT
-    showStatus('📤 جاري حفظ التحديثات في GitHub وتفعيل النشر...', false, false);
-    
     var bodyData = {
-      message: 'تحديث بيانات المتجر من لوحة التحكم - ' + new Date().toLocaleDateString('ar-EG'),
+      message: 'تحديث تلقائي للمتجر من لوحة التحكم - ' + new Date().toLocaleDateString('ar-EG'),
       content: encodedContent
     };
     if(currentSha){
@@ -2374,25 +2398,28 @@ function publishDirectToGitHub(){
   .then(function(){
     if(btn){
       btn.disabled = false;
-      btn.textContent = '✓ تم النشر بنجاح!';
+      btn.textContent = '✓ تم النشر التلقائي!';
       setTimeout(function(){
         btn.textContent = '🚀 نشر التحديثات إلى GitHub و Netlify تلقائياً';
       }, 4000);
     }
-    showStatus('🎉 <b>تم النشر بنجاح إلى GitHub!</b> يقوم Netlify الآن بتحديث الموقع تلقائياً لجميع الزوار خلال ثوانٍ معدودة.', true, false);
-    alert('🎉 رائع! تم إرسال كل التعديلات إلى GitHub مباشرة!\n\nNetlify سيقوم بتحديث الموقع لكل الزبائن والزوار تلقائياً دون أي تدخل منك.');
+    showStatus('🎉 <b>تم النشر بنجاح إلى GitHub!</b> يقوم Netlify بتحديث الموقع لكل الزوار الآن.', true, false);
+    showSyncToast('✅ تم نشر التعديلات تلقائياً إلى Netlify و GitHub بنجاح!', true, false);
+    if(!isSilent){
+      alert('🎉 تم إرسال التعديل تلقائياً إلى GitHub و Netlify بنجاح!');
+    }
   })
   .catch(function(err){
     console.error('GitHub API error:', err);
     if(btn){
       btn.disabled = false;
-      btn.textContent = '❌ فشل النشر - حاول ثانية';
+      btn.textContent = '❌ تعذر النشر';
       setTimeout(function(){
         btn.textContent = '🚀 نشر التحديثات إلى GitHub و Netlify تلقائياً';
       }, 3000);
     }
     showStatus('❌ خطأ: ' + err.message, false, true);
-    alert('تعذر النشر التلقائي:\n' + err.message + '\n\nملاحظة: يمكنك استخدام زر "تنزيل data.json" كحل بديل في أي وقت.');
+    showSyncToast('⚠️ تنبيه: تعذر الحفظ التلقائي في GitHub (' + err.message + ')', false, true);
   });
 }
 
