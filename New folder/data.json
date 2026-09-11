@@ -1,6 +1,6 @@
 {
-  "_version": 1789150386209,
-  "_updated_at": "2026-09-11T18:13:06.209Z",
+  "_version": 1789150388228,
+  "_updated_at": "2026-09-11T18:13:08.228Z",
   "_note": "تم التحديث تلقائياً من لوحة تحكم MSTORE عبر GitHub API",
   "mstore_custom_series": [],
   "mstore_custom_products": [],
@@ -97,10 +97,10 @@
       "available": true
     },
     "iPhone 15": {
-      "available": false
+      "available": true
     },
     "iPhone 14 Pro Max": {
-      "available": false
+      "available": true
     },
     "iPhone 14 Pro": {
       "available": false
