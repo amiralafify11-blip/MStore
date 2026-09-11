@@ -1,6 +1,6 @@
 {
-  "_version": 1789150378408,
-  "_updated_at": "2026-09-11T18:12:58.408Z",
+  "_version": 1789150381776,
+  "_updated_at": "2026-09-11T18:13:01.776Z",
   "_note": "تم التحديث تلقائياً من لوحة تحكم MSTORE عبر GitHub API",
   "mstore_custom_series": [],
   "mstore_custom_products": [],
@@ -70,16 +70,16 @@
       "available": true
     },
     "iPhone 17 Plus": {
-      "available": false
+      "available": true
     },
     "iPhone 17": {
-      "available": false
+      "available": true
     },
     "iPhone 16 Pro Max": {
-      "available": false
+      "available": true
     },
     "iPhone 16 Pro": {
-      "available": false
+      "available": true
     },
     "iPhone 16 Plus": {
       "available": false
