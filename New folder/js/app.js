@@ -24,7 +24,8 @@
     'mstore_setting_hero_title',
     'mstore_setting_gh_user',
     'mstore_setting_gh_repo',
-    'mstore_setting_gh_folder'
+    'mstore_setting_gh_folder',
+    'mstore_custom_badges'
     // mstore_setting_gh_token مُستثنى عمداً — لا يُخزَّن في data.json لتجنب اكتشافه بواسطة GitHub Secret Scanning
   ];
   var LOADED_FLAG = 'mstore_data_json_loaded_v1';
@@ -50,6 +51,7 @@
       if(typeof renderCustomSeriesToCatalog === 'function') renderCustomSeriesToCatalog();
       if(typeof applyProductOverridesToStore === 'function') applyProductOverridesToStore();
       if(typeof loadStoreSettings === 'function') loadStoreSettings();
+      if(typeof refreshBadgeUI === 'function') refreshBadgeUI();
     })
     .catch(function(){ /* data.json not found or error – use localStorage as-is */ });
 })();
@@ -182,6 +184,8 @@ function openProductByName(name){
     }
   });
   if(targetCard){
+    // لا تفتح تفاصيل الجهاز المعطّل
+    if(targetCard.getAttribute('data-disabled') === 'true') return;
     var vLink = targetCard.querySelector('.view-device');
     if(vLink) openProduct(vLink);
   } else {
@@ -798,7 +802,7 @@ function saveCustomSeries(seriesList){
 
 function openAddSeriesModal(){
   document.getElementById('newSeriesTitle').value='';
-  document.getElementById('newSeriesBadge').value='جديد';
+  document.getElementById('newSeriesBadge').value='';
   document.getElementById('newSeriesId').value='';
   openAdminSubModal('adminAddSeriesModal');
 }
@@ -817,7 +821,7 @@ function saveNewSeries(){
     return;
   }
   
-  list.push({id: id, title: title, badge: badge||'جديد'});
+  list.push({id: id, title: title, badge: badge||''});
   saveCustomSeries(list);
   closeAdminSubModal('adminAddSeriesModal');
   alert('تمت إضافة القسم الجديد "'+title+'" بنجاح! 🚀');
@@ -876,10 +880,17 @@ function renderAdminSeriesTable(){
     
     // 3. Badge
     var tdBadge = document.createElement('td');
-    var bSpan = document.createElement('span');
-    bSpan.className = 'new-badge';
-    bSpan.textContent = s.badge || 'جديد';
-    tdBadge.appendChild(bSpan);
+    if(s.badge){
+      var bSpan = document.createElement('span');
+      bSpan.className = 'new-badge';
+      bSpan.textContent = s.badge;
+      tdBadge.appendChild(bSpan);
+    } else {
+      var noB = document.createElement('span');
+      noB.style.cssText = 'color:#555;font-size:11px';
+      noB.textContent = '—';
+      tdBadge.appendChild(noB);
+    }
     
     // 4. Product count
     var count = customProds.filter(function(p){ return p.seriesId === s.id; }).length;
@@ -918,6 +929,97 @@ function saveCustomProducts(prodList){
   renderCustomProductsToCatalog();
   renderAdminProducts();
 }
+
+/* ==========================================
+   BADGE MANAGEMENT — إدارة الشارات المخصصة
+   ========================================== */
+
+function getCustomBadges(){
+  try{
+    return JSON.parse(localStorage.getItem('mstore_custom_badges')) || [];
+  }catch(e){ return []; }
+}
+
+function saveCustomBadgesStore(list){
+  safeSetItem('mstore_custom_badges', list);
+}
+
+/* تحديث datalist الشارات المشتركة وعرض التاجات */
+function refreshBadgeUI(){
+  var badges = getCustomBadges();
+  // تحديث كل datalist مشترك في الصفحة
+  document.querySelectorAll('#sharedBadgeSuggestions').forEach(function(dl){
+    dl.innerHTML = '';
+    badges.forEach(function(b){
+      var opt = document.createElement('option');
+      opt.value = b;
+      dl.appendChild(opt);
+    });
+  });
+
+  // تحديث صناديق التاجات في نافذة التعديل ونافذة الإضافة
+  ['badgeTagsBox', 'newBadgeTagsBox'].forEach(function(boxId){
+    var box = document.getElementById(boxId);
+    if(!box) return;
+    box.innerHTML = '';
+    if(badges.length === 0){
+      var empty = document.createElement('span');
+      empty.style.cssText = 'color:#555;font-size:11px';
+      empty.textContent = 'القائمة فارغة حالياً. اكتب شارة واضغط «حفظ في القائمة».';
+      box.appendChild(empty);
+      return;
+    }
+    var targetInputId = (boxId === 'newBadgeTagsBox') ? 'newProdBadge' : 'editProdBadge';
+    badges.forEach(function(b, idx){
+      var tag = document.createElement('span');
+      tag.style.cssText = 'display:inline-flex;align-items:center;gap:5px;background:#1a1a1a;border:1px solid #444;border-radius:20px;padding:4px 12px;font-size:12px;color:#ddd;cursor:pointer;transition:all .2s ease';
+      tag.title = 'انقر لاختيار هذه الشارة';
+      tag.innerHTML = b + ' <button type="button" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:13px;padding:0;line-height:1;margin-right:2px" title="حذف هذه الشارة من القائمة">×</button>';
+      
+      tag.querySelector('button').onclick = function(e){
+        e.stopPropagation();
+        removeBadgeFromList(idx);
+      };
+      
+      tag.onclick = function(){
+        var inp = document.getElementById(targetInputId);
+        if(inp) inp.value = b;
+      };
+      box.appendChild(tag);
+    });
+  });
+}
+
+/* حفظ شارة جديدة في القائمة */
+function saveNewBadgeToList(inputId){
+  var inp = document.getElementById(inputId);
+  if(!inp) return;
+  var val = inp.value.trim();
+  if(!val){ alert('يرجى كتابة نص الشارة أولاً'); return; }
+  var list = getCustomBadges();
+  if(list.indexOf(val) > -1){
+    alert('هذه الشارة موجودة في القائمة مسبقاً!');
+    return;
+  }
+  list.push(val);
+  saveCustomBadgesStore(list);
+  refreshBadgeUI();
+  alert('✅ تمت إضافة الشارة «' + val + '» إلى القائمة بنجاح!');
+}
+
+/* حذف شارة من القائمة */
+function removeBadgeFromList(idx){
+  var list = getCustomBadges();
+  var name = list[idx];
+  if(!confirm('هل تريد حذف الشارة «' + name + '» من القائمة؟')){ return; }
+  list.splice(idx, 1);
+  saveCustomBadgesStore(list);
+  refreshBadgeUI();
+}
+
+// تحميل الشارات عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', function(){ refreshBadgeUI(); });
+setTimeout(function(){ refreshBadgeUI(); }, 500);
 
 /* ==========================================
    INTERACTIVE COLOR & STORAGE BUILDER LOGIC
@@ -1365,34 +1467,22 @@ function openAddProductModal(){
     });
   }
   document.getElementById('newProdName').value = '';
-  document.getElementById('newProdPrice').value = '5199';
-  document.getElementById('newProdBadge').value = 'جديد';
-  if(document.getElementById('newProdSpecOS')) document.getElementById('newProdSpecOS').value = 'iOS 18';
-  document.getElementById('newProdSpecScreen').value = '6.9 بوصة Super Retina XDR';
-  document.getElementById('newProdSpecChip').value = 'A19 Pro / Bionic';
-  document.getElementById('newProdSpecCamera').value = '48MP + 48MP + 12MP';
-  document.getElementById('newProdSpecBattery').value = 'حتى 33 ساعة تشغيل فيديو';
+  document.getElementById('newProdPrice').value = '';
+  document.getElementById('newProdBadge').value = '';
+  if(document.getElementById('newProdSpecOS')) document.getElementById('newProdSpecOS').value = '';
+  document.getElementById('newProdSpecScreen').value = '';
+  document.getElementById('newProdSpecChip').value = '';
+  document.getElementById('newProdSpecCamera').value = '';
+  document.getElementById('newProdSpecBattery').value = '';
   document.getElementById('newProdAbout').value = '';
+
 
   productImagesState.new = [];
   renderImagePreviews('new');
 
-  builderState.new.colors = [
-    {label:'تيتانيوم طبيعي', code:'#8b8b8b'},
-    {label:'أسود فضائي', code:'#2b2b2b'},
-    {label:'أبيض تيتانيوم', code:'#e9e6de'}
-  ];
-  builderState.new.storages = [
-    {size:'256GB', add:0},
-    {size:'512GB', add:400},
-    {size:'1TB', add:800}
-  ];
-  builderState.new.conditions = [
-    {label:'جديد', price:5199},
-    {label:'كرتونة مفتوحة', price:4899},
-    {label:'مستعمل ممتاز', price:4599},
-    {label:'جيد جداً', price:4199}
-  ];
+  builderState.new.colors = [];
+  builderState.new.storages = [];
+  builderState.new.conditions = [];
 
   initColorPresets('new');
   initStoragePresets('new');
@@ -1400,6 +1490,7 @@ function openAddProductModal(){
   renderActiveColors('new');
   renderActiveStorages('new');
   renderActiveConditions('new');
+  refreshBadgeUI();
 
   openAdminSubModal('adminAddProductModal');
 }
@@ -1409,7 +1500,7 @@ function saveNewProduct(){
   var seriesId = document.getElementById('newProdSeriesSelect').value;
   var price = parseInt(document.getElementById('newProdPrice').value,10) || 0;
   var badge = document.getElementById('newProdBadge') ? document.getElementById('newProdBadge').value.trim() : '';
-  var os = (document.getElementById('newProdSpecOS') ? document.getElementById('newProdSpecOS').value.trim() : '') || 'iOS 18';
+  var os = (document.getElementById('newProdSpecOS') ? document.getElementById('newProdSpecOS').value.trim() : '');
   var screen = document.getElementById('newProdSpecScreen').value.trim();
   var chip = document.getElementById('newProdSpecChip').value.trim();
   var camera = document.getElementById('newProdSpecCamera').value.trim();
@@ -1417,24 +1508,18 @@ function saveNewProduct(){
   var about = document.getElementById('newProdAbout').value.trim();
   
   if(!name){ alert('يرجى إدخال اسم الجهاز'); return; }
-  if(price <= 0){ alert('يرجى إدخال سعر صحيح'); return; }
+  if(!price){ alert('يرجى إدخال سعر صحيح'); return; }
   
   var imgs = (productImagesState.new && productImagesState.new.length > 0) ? productImagesState.new.slice() : ['https://commons.wikimedia.org/wiki/Special:Redirect/file/IPhone_17_Pro.png'];
   var mainImg = imgs[0];
   
-  var colors = builderState.new.colors.length > 0 ? builderState.new.colors : [
-    {label:'تيتانيوم طبيعي', code:'#8b8b8b'},
-    {label:'أسود فضائي', code:'#2b2b2b'},
-    {label:'أبيض تيتانيوم', code:'#e9e6de'}
-  ];
-  var storages = builderState.new.storages.length > 0 ? builderState.new.storages : [
-    {size:'256GB', add:0},
-    {size:'512GB', add:400},
-    {size:'1TB', add:800}
-  ];
+  var colors = builderState.new.colors.slice();
+  var storages = builderState.new.storages.slice();
   var conditions = builderState.new.conditions.length > 0 ? builderState.new.conditions : [
     {label:'جديد', price: price}
   ];
+
+
 
   var newP = {
     id: 'prod_' + Date.now(),
@@ -1507,10 +1592,12 @@ function renderCustomSeriesToCatalog(){
       var h3Div = document.createElement('div');
       var h3 = document.createElement('h3');
       h3.textContent = cs.title + ' ';
-      var nBadge = document.createElement('span');
-      nBadge.className = 'new-badge';
-      nBadge.textContent = cs.badge;
-      h3.appendChild(nBadge);
+      if(cs.badge){
+        var nBadge = document.createElement('span');
+        nBadge.className = 'new-badge';
+        nBadge.textContent = cs.badge;
+        h3.appendChild(nBadge);
+      }
       h3Div.appendChild(h3);
       
       var actDiv = document.createElement('div');
@@ -1648,33 +1735,18 @@ function openEditProductModal(prodName){
   productImagesState.edit = existingImages;
   renderImagePreviews('edit');
 
-  builderState.edit.colors = (d.colors && d.colors.length > 0) ? JSON.parse(JSON.stringify(d.colors)) : [
-    {label:'أسود فضائي', code:'#3a3a3a'},
-    {label:'تيتانيوم طبيعي', code:'#8b8b8b'},
-    {label:'أبيض تيتانيوم', code:'#e9e6de'},
-    {label:'أزرق داكن', code:'#2e3a52'},
-    {label:'برتقالي كوزمك', code:'#c4622f'}
-  ];
+  builderState.edit.colors = (d.colors && d.colors.length > 0) ? JSON.parse(JSON.stringify(d.colors)) : [];
   initColorPresets('edit');
   renderActiveColors('edit');
 
-  builderState.edit.storages = (d.storages && d.storages.length > 0) ? JSON.parse(JSON.stringify(d.storages)) : [
-    {size:'256GB', add:0},
-    {size:'512GB', add:400},
-    {size:'1TB', add:800},
-    {size:'2TB', add:1600}
-  ];
+  builderState.edit.storages = (d.storages && d.storages.length > 0) ? JSON.parse(JSON.stringify(d.storages)) : [];
   initStoragePresets('edit');
   renderActiveStorages('edit');
 
-  builderState.edit.conditions = (d.conditions && Array.isArray(d.conditions) && d.conditions.length > 0) ? JSON.parse(JSON.stringify(d.conditions)) : [
-    {label:'جديد', price: (d.price || curPrice)},
-    {label:'كرتونة مفتوحة', price: Math.round((d.price || curPrice) * 0.95)},
-    {label:'مستعمل ممتاز', price: Math.round((d.price || curPrice) * 0.88)},
-    {label:'جيد جداً', price: Math.round((d.price || curPrice) * 0.80)}
-  ];
+  builderState.edit.conditions = (d.conditions && Array.isArray(d.conditions) && d.conditions.length > 0) ? JSON.parse(JSON.stringify(d.conditions)) : [];
   initConditionPresets('edit');
   renderActiveConditions('edit');
+
 
   // Populate series dropdown in Edit Product modal
   var select = document.getElementById('editProdSeriesSelect');
@@ -1713,6 +1785,7 @@ function openEditProductModal(prodName){
     if(currentSeriesId) select.value = currentSeriesId;
   }
 
+  refreshBadgeUI();
   openAdminSubModal('adminEditProductModal');
 }
 
@@ -1732,19 +1805,10 @@ function saveCustomProductDetails(){
   var imgs = (productImagesState.edit && productImagesState.edit.length > 0) ? productImagesState.edit.slice() : ['https://commons.wikimedia.org/wiki/Special:Redirect/file/IPhone_17_Pro.png'];
   var mainImg = imgs[0];
 
-  var colors = builderState.edit.colors.length > 0 ? builderState.edit.colors : [
-    {label:'تيتانيوم طبيعي', code:'#8b8b8b'},
-    {label:'أسود فضائي', code:'#2b2b2b'},
-    {label:'أبيض تيتانيوم', code:'#e9e6de'}
-  ];
-  var storages = builderState.edit.storages.length > 0 ? builderState.edit.storages : [
-    {size:'256GB', add:0},
-    {size:'512GB', add:400},
-    {size:'1TB', add:800}
-  ];
-  var conditions = (builderState.edit.conditions && builderState.edit.conditions.length > 0) ? builderState.edit.conditions : [
-    {label:'جديد', price: price}
-  ];
+  var colors = builderState.edit.colors.slice();
+  var storages = builderState.edit.storages.slice();
+  var conditions = (builderState.edit.conditions && builderState.edit.conditions.length > 0) ? builderState.edit.conditions : [];
+
 
   var allDetails = getAllProductDetails();
   allDetails[origName] = {
@@ -1858,8 +1922,33 @@ function applyProductOverridesToStore(){
         var priceEl = card.querySelector('.product-price');
         if(priceEl) priceEl.textContent = parseInt(overrides[name].price, 10).toLocaleString('en-US') + ' AED';
       }
-      if(overrides[name].available !== undefined){
-        card.style.opacity = overrides[name].available ? '1' : '.45';
+      var isAvailable = overrides[name].available !== undefined ? overrides[name].available : true;
+      if(!isAvailable){
+        // جهاز معطّل: مظهر باهت ومنع فتح التفاصيل
+        card.style.opacity = '.45';
+        card.style.pointerEvents = 'none';
+        card.setAttribute('data-disabled', 'true');
+        var vLink = card.querySelector('.view-device');
+        if(vLink){
+          vLink.style.display = 'none';
+        }
+        // إضافة رسالة "غير متوفر" إذا لم تكن موجودة
+        if(!card.querySelector('.unavailable-label')){
+          var unavailLabel = document.createElement('div');
+          unavailLabel.className = 'unavailable-label';
+          unavailLabel.textContent = 'غير متوفر حالياً';
+          unavailLabel.style.cssText = 'text-align:center;color:#e74c3c;font-size:11px;font-weight:700;padding:4px 0;letter-spacing:.5px';
+          card.appendChild(unavailLabel);
+        }
+      } else {
+        // جهاز متاح: استعادة المظهر الطبيعي
+        card.style.opacity = '1';
+        card.style.pointerEvents = '';
+        card.removeAttribute('data-disabled');
+        var vLink2 = card.querySelector('.view-device');
+        if(vLink2) vLink2.style.display = '';
+        var unavailLabel2 = card.querySelector('.unavailable-label');
+        if(unavailLabel2) unavailLabel2.remove();
       }
     }
   });
@@ -1963,15 +2052,18 @@ function renderAdminProducts(query){
     toggleBtn.onclick = function(){ toggleProductAvail(name); };
     actDiv.appendChild(toggleBtn);
     
+    var delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 'admin-sm-btn danger';
+    delBtn.title = 'حذف الجهاز';
+    delBtn.textContent = '🗑️';
     if(isCustom){
-      var delBtn = document.createElement('button');
-      delBtn.type = 'button';
-      delBtn.className = 'admin-sm-btn danger';
-      delBtn.title = 'حذف الجهاز';
-      delBtn.textContent = '🗑️';
       delBtn.onclick = function(){ deleteCustomProduct(card.id, name); };
-      actDiv.appendChild(delBtn);
+    } else {
+      delBtn.onclick = function(){ deleteBuiltinProduct(card, name); };
     }
+    actDiv.appendChild(delBtn);
+
     
     tdActions.appendChild(actDiv);
     
@@ -1991,6 +2083,26 @@ function renderAdminProducts(query){
 function filterAdminProducts(q){
   renderAdminProducts(q);
 }
+
+/* حذف جهاز أصلي (مضمّن في HTML) */
+function deleteBuiltinProduct(card, name){
+  if(!confirm('هل أنت متأكد من حذف الجهاز "' + name + '"؟\nسيتم إخفاؤه نهائياً من المتجر.')){
+    return;
+  }
+  // إزالة الكارت من الواجهة
+  if(card && card.parentNode) card.parentNode.removeChild(card);
+  // حذف بياناته من product_details
+  var allDetails = getAllProductDetails();
+  delete allDetails[name];
+  safeSetItem('mstore_product_details', allDetails);
+  // حذف أي overrides مرتبطة به
+  var overrides = getProductOverrides();
+  delete overrides[name];
+  safeSetItem('mstore_product_overrides', overrides);
+  renderAdminProducts(document.getElementById('adminProductSearch') ? document.getElementById('adminProductSearch').value : '');
+  publishDirectToGitHub(true);
+}
+
 
 function toggleProductAvail(name){
   var overrides = getProductOverrides();
@@ -2195,7 +2307,8 @@ function publishToSite(){
     'mstore_setting_gh_user',
     'mstore_setting_gh_repo',
     'mstore_setting_gh_folder',
-    'mstore_setting_gh_token'
+    'mstore_setting_gh_token',
+    'mstore_custom_badges'
   ];
 
   var snapshot = {
@@ -2327,7 +2440,8 @@ function publishDirectToGitHub(isSilent){
     'mstore_setting_hero_title',
     'mstore_setting_gh_user',
     'mstore_setting_gh_repo',
-    'mstore_setting_gh_folder'
+    'mstore_setting_gh_folder',
+    'mstore_custom_badges'
     // mstore_setting_gh_token مُستثنى عمداً — لا يُرفع في data.json لتجنب GitHub Secret Scanning
   ];
 
