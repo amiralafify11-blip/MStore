@@ -1,11 +1,15 @@
 {
-  "_version": 1789338148976,
-  "_updated_at": "2026-09-13T22:22:28.976Z",
+  "_version": 1789338242009,
+  "_updated_at": "2026-09-13T22:24:02.009Z",
   "_note": "تم التحديث تلقائياً من لوحة تحكم MSTORE عبر GitHub API",
   "mstore_custom_series": [],
   "mstore_custom_products": [],
   "mstore_product_details": {},
-  "mstore_product_overrides": {},
+  "mstore_product_overrides": {
+    "iPhone 17 Plus": {
+      "available": false
+    }
+  },
   "mstore_setting_facebook": "https://facebook.com",
   "mstore_setting_tiktok": "https://www.tiktok.com/@mstore2ubot",
   "mstore_setting_whatsapp_eg": 201272897754,
