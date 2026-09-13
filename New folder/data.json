@@ -1,6 +1,6 @@
 {
-  "_version": 1789338142620,
-  "_updated_at": "2026-09-13T22:22:22.620Z",
+  "_version": 1789338145025,
+  "_updated_at": "2026-09-13T22:22:25.025Z",
   "_note": "تم التحديث تلقائياً من لوحة تحكم MSTORE عبر GitHub API",
   "mstore_custom_series": [],
   "mstore_custom_products": [],
@@ -10,9 +10,6 @@
       "available": true
     },
     "iPhone 17 Pro": {
-      "available": true
-    },
-    "iPhone 17 Plus": {
       "available": true
     }
   },
