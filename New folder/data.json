@@ -1,6 +1,6 @@
 {
-  "_version": 1789338123029,
-  "_updated_at": "2026-09-13T22:22:03.029Z",
+  "_version": 1789338124456,
+  "_updated_at": "2026-09-13T22:22:04.456Z",
   "_note": "تم التحديث تلقائياً من لوحة تحكم MSTORE عبر GitHub API",
   "mstore_custom_series": [],
   "mstore_custom_products": [],
@@ -22,9 +22,6 @@
       "available": true
     },
     "iPhone 16 Pro": {
-      "available": true
-    },
-    "iPhone 16 Plus": {
       "available": true
     },
     "iPhone 15 Plus": {
