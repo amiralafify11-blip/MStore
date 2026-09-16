@@ -2391,42 +2391,23 @@ function publishDirectToGitHub(isSilent){
   var repo = (document.getElementById('ghRepo') ? document.getElementById('ghRepo').value.trim() : '') || localStorage.getItem('mstore_setting_gh_repo') || defaultGhRepo;
   var folder = (document.getElementById('ghFolder') ? document.getElementById('ghFolder').value.trim() : '') || localStorage.getItem('mstore_setting_gh_folder') || defaultGhFolder;
   
-  // نستخدم دائماً الرمز الصالح المؤكد مباشرة لمنع أي تعارض مع الرموز القديمة
   var token = defaultGhToken;
   localStorage.setItem('mstore_setting_gh_token', token);
   if(document.getElementById('ghToken')) document.getElementById('ghToken').value = token;
 
-  var statusEl = document.getElementById('ghPublishStatus');
   var btn = document.getElementById('btnPublishGitHub');
 
-  function showStatus(msg, isSuccess, isError){
-    if(statusEl){
-      statusEl.style.display = 'block';
-      statusEl.style.background = isSuccess ? '#15331f' : (isError ? '#3a1616' : '#222');
-      statusEl.style.border = isSuccess ? '1px solid #27ae60' : (isError ? '1px solid #e74c3c' : '1px solid #444');
-      statusEl.style.color = isSuccess ? '#2ecc71' : (isError ? '#ff7675' : '#ccc');
-      statusEl.innerHTML = msg;
-    }
-  }
-
-  if(!user || !repo || !token){
-    if(!isSilent) alert('يرجى إدخال إعدادات GitHub أولاً!');
-    showStatus('⚠️ يرجى إكمال إعدادات GitHub أعلاه.', false, true);
-    return;
-  }
+  if(!user || !repo || !token){ return; }
 
   localStorage.setItem('mstore_setting_gh_user', user);
   localStorage.setItem('mstore_setting_gh_repo', repo);
   localStorage.setItem('mstore_setting_gh_token', token);
 
-  if(btn){
+  if(btn && !isSilent){
     btn.disabled = true;
-    btn.textContent = '⏳ جاري النشر التلقائي...';
+    btn.textContent = '⏳ جاري النشر...';
   }
-  showStatus('⏳ جاري التواصل مع GitHub وحفظ البيانات تلقائياً...', false, false);
-  showSyncToast('⏳ جاري المزامنة مع GitHub و Netlify...', false, false);
 
-  // 1. تجهيز بيانات snapshot
   var DATA_KEYS = [
     'mstore_custom_series',
     'mstore_custom_products',
@@ -2473,7 +2454,6 @@ function publishDirectToGitHub(isSilent){
 
   var apiUrl = 'https://api.github.com/repos/' + encodeURIComponent(user) + '/' + encodeURIComponent(repo) + '/contents/' + encodeURI(pathPrefix + 'data.json');
 
-  // 2. الحصول على SHA الحالي لملف data.json
   fetch(apiUrl, {
     headers: {
       'Authorization': 'Bearer ' + token,
@@ -2487,7 +2467,7 @@ function publishDirectToGitHub(isSilent){
     } else if(res.status === 404){
       return null;
     } else {
-      throw new Error('فشل الوصول للمستودع (' + res.status + '). تحقق من صلاحية الـ Token.');
+      throw new Error('فشل الوصول للمستودع (' + res.status + ')');
     }
   })
   .then(function(currentSha){
@@ -2522,29 +2502,21 @@ function publishDirectToGitHub(isSilent){
   .then(function(){
     if(btn){
       btn.disabled = false;
-      btn.textContent = '✓ تم النشر التلقائي!';
+      btn.textContent = '✓ تم النشر!';
       setTimeout(function(){
         btn.textContent = '🚀 نشر التحديثات إلى GitHub و Netlify تلقائياً';
-      }, 4000);
+      }, 3000);
     }
-    showStatus('🎉 <b>تم النشر بنجاح إلى GitHub!</b> يقوم Netlify بتحديث الموقع لكل الزوار الآن.', true, false);
-    showSyncToast('✅ تم نشر التعديلات تلقائياً إلى Netlify و GitHub بنجاح!', true, false);
-    if(!isSilent){
-      alert('🎉 تم إرسال التعديل تلقائياً إلى GitHub و Netlify بنجاح!');
-    }
+    console.log('✅ تم النشر إلى GitHub بنجاح.');
   })
   .catch(function(err){
     console.error('GitHub API error:', err);
     if(btn){
       btn.disabled = false;
-      btn.textContent = '❌ تعذر النشر';
-      setTimeout(function(){
-        btn.textContent = '🚀 نشر التحديثات إلى GitHub و Netlify تلقائياً';
-      }, 3000);
+      btn.textContent = '🚀 نشر التحديثات إلى GitHub و Netlify تلقائياً';
     }
-    showStatus('❌ خطأ: ' + err.message, false, true);
-    showSyncToast('⚠️ تنبيه: تعذر الحفظ التلقائي في GitHub (' + err.message + ')', false, true);
   });
 }
+
 
 
